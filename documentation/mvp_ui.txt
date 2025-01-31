@@ -1,0 +1,140 @@
+MVP UI Context for Gmail Productivity Assistant (Chrome Extension)
+Objective
+The goal is to build a Chrome extension that provides a seamless, user-friendly interface for managing tasks, summarizing emails, and setting reminders, all integrated with the backend functionalities implemented in main.py.
+
+Core Features
+1. Task Dashboard
+Description: A dashboard displaying tasks retrieved from the backend.
+Functionality:
+Fetch tasks via /api/tasks/{user_email}.
+Display task details, including:
+Title
+Priority (High, Medium, Low)
+Status (Pending, In Progress, Completed)
+Due Date
+Allow users to:
+Update task status (trigger PUT /api/tasks/{task_id}).
+Edit task priorities and due dates.
+UI Design:
+Use a card layout for each task, with color-coded priorities.
+Include icons for quick actions like "Mark Complete" or "Edit."
+2. Email Summarization and Task Extraction
+Description: Enable users to summarize emails and extract actionable tasks directly from the Gmail interface.
+Functionality:
+Trigger email summarization via /api/extract.
+Show extracted tasks in a sidebar or popup.
+UI Design:
+A button in the Gmail interface labeled "Extract Tasks."
+Display a list of tasks extracted from the selected email with options to:
+Save tasks to the dashboard.
+Set reminders directly.
+3. Reminder Management
+Description: Allow users to manage reminders for tasks.
+Functionality:
+Fetch reminders associated with tasks from /api/tasks/{task_id}/reminder.
+Allow users to:
+Add new reminders via POST /api/tasks/{task_id}/reminder.
+Delete reminders via DELETE /api/tasks/{task_id}/reminder.
+UI Design:
+Add a modal or form for setting reminders, with options for:
+Reminder time (using a date-time picker).
+Frequency (one-time, daily, weekly).
+4. Gmail Integration
+Description: Embed the extension UI as a sidebar within Gmail.
+Functionality:
+Display tasks related to the selected email thread.
+Provide quick actions (e.g., "Summarize Email," "Add Task").
+UI Design:
+Sidebar layout with sections for:
+Related tasks.
+Quick links to task and reminder actions.
+5. Error Handling and Notifications
+Description: Ensure a smooth user experience with informative feedback.
+Functionality:
+Display errors for failed API calls (e.g., "Failed to fetch tasks").
+Notify users of successful actions (e.g., "Reminder set successfully").
+UI Design:
+Use toast notifications or alert modals for feedback.
+Chrome Extension Architecture
+1. Manifest File (manifest.json)
+Permissions:
+Gmail access via https://mail.google.com/.
+Use storage for saving user preferences locally.
+Content Scripts:
+Inject sidebar UI into the Gmail interface.
+Background Scripts:
+Handle API calls and maintain authentication tokens.
+2. Popup HTML
+A small, standalone interface for:
+Viewing tasks.
+Triggering email summarization and task extraction.
+3. Sidebar HTML
+Embedded interface within Gmail for managing tasks and reminders.
+Displays contextual information related to the selected email thread.
+4. JavaScript Logic
+Use fetch or Axios for API integration.
+Include functions for:
+Fetching tasks, reminders, and email content.
+Triggering task updates and extractions.
+Handle dynamic updates to the UI based on user interactions.
+5. CSS Styling
+Use Material-UI for consistency or custom CSS for lightweight styling.
+Ensure responsiveness and a clean layout.
+API Integration
+Endpoints to Use (from main.py):
+Task Retrieval:
+
+Endpoint: /api/tasks/{user_email}
+Method: GET
+Purpose: Fetch tasks for the logged-in user.
+Task Update:
+
+Endpoint: /api/tasks/{task_id}
+Method: PUT
+Purpose: Update task details (e.g., status, priority).
+Task Extraction:
+
+Endpoint: /api/extract
+Method: POST
+Purpose: Extract tasks from the selected email.
+Reminder Management:
+
+Endpoint: /api/tasks/{task_id}/reminder
+Methods: POST, DELETE
+Purpose: Add or remove reminders for tasks.
+Authentication:
+
+Endpoints: /api/oauth/url and /api/oauth/callback
+Purpose: Authenticate the user and obtain tokens for Gmail API access.
+Development Steps
+Setup:
+
+Create manifest.json with permissions for Gmail and API access.
+Design basic HTML layouts for the popup and sidebar.
+Frontend Integration:
+
+Use JavaScript to connect the frontend to backend APIs.
+Dynamically update the UI based on API responses.
+Styling:
+
+Implement responsive designs using CSS or Material-UI.
+Testing:
+
+Test API calls and UI interactions in Gmail’s interface.
+Validate Chrome extension behavior across multiple Gmail accounts.
+Deployment:
+
+Package the extension and upload it to the Chrome Web Store.
+Tools and Libraries
+Frontend:
+HTML, CSS, JavaScript.
+Material-UI or Bootstrap for styling.
+API Calls:
+Axios or Fetch API.
+Testing:
+Chrome DevTools for debugging.
+Postman for validating API endpoints.
+Key Constraints
+Ensure token security in all API calls.
+Use HTTPS for secure communication.
+Avoid breaking changes to the backend.

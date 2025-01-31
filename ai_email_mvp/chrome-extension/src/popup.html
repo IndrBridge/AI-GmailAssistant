@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gmail Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Gmail Assistant</h1>
+      <div id="connection-status" class="status-indicator disconnected">
+        <span class="status-dot"></span>
+        <span class="status-text">Disconnected</span>
+      </div>
+    </div>
+
+    <!-- Message Display -->
+    <div id="message"></div>
+
+    <!-- Sign In Panel -->
+    <div id="sign-in-panel" class="panel">
+      <h2>Welcome to Gmail Assistant</h2>
+      <p>Sign in with your Google account to get started:</p>
+      <button id="sign-in-button" class="primary-button">
+        <img src="https://www.google.com/favicon.ico" alt="Google" width="16" height="16">
+        Sign in with Google
+      </button>
+    </div>
+
+    <!-- Main Content (shown after sign in) -->
+    <div id="main-content" class="panel" style="display: none;">
+      <div class="stats">
+        <div class="stat-item">
+          <label>Tasks</label>
+          <span id="tasks-count">0</span>
+        </div>
+        <div class="stat-item">
+          <label>Reminders</label>
+          <span id="reminders-count">0</span>
+        </div>
+      </div>
+      
+      <button id="open-gmail" class="secondary-button">
+        Open Gmail
+      </button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

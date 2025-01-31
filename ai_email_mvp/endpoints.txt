@@ -1,0 +1,399 @@
+# Gmail Assistant API Endpoints Documentation
+
+## Root Endpoint
+
+1. Health Check
+   GET /
+   - Status: Working
+   - Purpose: Basic health check
+   - Authentication: None required
+   - Response: {"message": "Hello from FastAPI MVP!"}
+
+## Core Authentication Endpoints
+
+1. OAuth Flow
+   a. GET /api/oauth/url
+      - Status: Working
+      - Purpose: Get Google OAuth URL for authentication
+      - Authentication: None required
+      - Response: {"url": "https://accounts.google.com/..."}
+
+   b. GET /api/oauth/callback
+      - Status: Working
+      - Purpose: Handle Google OAuth callback
+      - Query params: code
+      - Response: {
+          "access_token": "jwt_token",
+          "token_type": "bearer",
+          "user": {
+              "id": 1,
+              "email": "user@example.com",
+              "created_at": "datetime"
+          }
+      }
+
+2. Token Management
+   a. POST /token
+      - Status: Working
+      - Purpose: Get JWT token using OAuth credentials
+      - Form data: username (email), password (oauth token)
+      - Response: {
+          "access_token": "jwt_token",
+          "token_type": "bearer"
+      }
+
+## User Management
+
+1. User Operations
+   a. POST /api/users
+      - Status: Working
+      - Purpose: Create new user
+      - Required Fields: email, oauth_token
+      - Response: {
+          "id": 1,
+          "email": "user@example.com",
+          "created_at": "datetime"
+      }
+
+   b. GET /api/users/me
+      - Status: Working
+      - Purpose: Get current user info
+      - Authentication: Bearer token required
+      - Response: {
+          "id": 1,
+          "email": "user@example.com",
+          "created_at": "datetime"
+      }
+
+## Task Management Endpoints
+
+1. Task Creation & Extraction
+   a. OPTIONS /api/extract
+      - Status: Working
+      - Purpose: CORS preflight for extract endpoint
+      - Authentication: None required
+      - Response: {"message": "OK"}
+
+   b. POST /api/extract
+      - Status: Not Working (received_at datetime issue)
+      - Purpose: Extract tasks from email content
+      - Authentication: Bearer token required
+      - Required Fields: content, gmail_id, user_email
+      - Response: {
+          "message": "Successfully extracted N tasks",
+          "tasks": [...],
+          "suggested_reply": "..."
+      }
+
+2. Task Operations
+   a. GET /api/tasks/{user_email}
+      - Status: Working
+      - Purpose: Get tasks for a user with filtering
+      - Authentication: Bearer token required
+      - Query Parameters:
+        - status: ["pending", "in_progress", "completed", "deleted"]
+        - priority: ["high", "medium", "low"]
+        - due_date_start: ISO date
+        - due_date_end: ISO date
+        - search_query: string
+
+   b. PUT /api/tasks/{task_id}
+      - Status: Not Working (Method Not Allowed)
+      - Purpose: Update task status and details
+      - Authentication: Bearer token required
+      - Request Body: {
+          "status": "string",
+          "priority": "string",
+          "due_date": "datetime"
+      }
+
+   c. POST /api/tasks/{task_id}/confirm
+      - Status: Working
+      - Purpose: Mark task as completed
+      - Authentication: Bearer token required
+
+   d. POST /api/tasks/{task_id}/reject
+      - Status: Working
+      - Purpose: Mark task as rejected/deleted
+      - Authentication: Bearer token required
+
+   e. POST /api/tasks/{task_id}/test
+      - Status: Working
+      - Purpose: Create test tasks for development
+      - Authentication: Bearer token required
+      - Required Fields: user_email
+      - Response: Array of created test tasks
+
+3. Task Reminders 
+   a. POST /api/tasks/{task_id}/reminder
+      - Status: Working
+      - Purpose: Set task reminder
+      - Authentication: Bearer token required
+      - Required Fields: reminder_time (must be timezone-aware datetime)
+      - Response: {
+          "message": "Reminder set successfully",
+          "task": {
+              "id": 1,
+              "title": "Task title",
+              "reminder_time": "2024-01-01T10:00:00Z",
+              ...
+          }
+      }
+
+   b. GET /api/tasks/reminders
+      - Status: Not Working (Authorization Error)
+      - Purpose: Get upcoming reminders
+      - Authentication: Bearer token required
+      - Response: {
+          "reminders": [
+              {
+                  "task_id": 1,
+                  "title": "Task title",
+                  "reminder_time": "2024-01-01T10:00:00Z"
+              }
+          ]
+      }
+
+## Team Management Endpoints
+
+1. Team Operations
+   a. POST /api/teams
+      - Status: Working
+      - Purpose: Create new team
+      - Authentication: Bearer token required
+      - Required Fields: name, user_email
+      - Response: {
+          "id": 1,
+          "name": "Team name",
+          "created_at": "datetime"
+      }
+
+   b. GET /api/teams
+      - Status: Working
+      - Purpose: Get user's teams
+      - Authentication: Bearer token required
+      - Query params: user_email
+
+   c. GET /api/teams/{team_id}/members
+      - Status: Working
+      - Purpose: Get team members
+      - Authentication: Bearer token required
+      - Response: List of team members with roles
+
+   d. PUT /api/teams/{team_id}
+      - Status: Working
+      - Purpose: Update team
+      - Authentication: Bearer token required
+      - Required Fields: name, user_email
+
+   e. DELETE /api/teams/{team_id}
+      - Status: Working
+      - Purpose: Delete team
+      - Authentication: Bearer token required
+      - Query params: user_email
+
+## Email Processing Endpoints 
+
+1. Current Email Processing
+   a. POST /api/emails/current/process
+      - Status: Working
+      - Purpose: Process currently viewed email
+      - Authentication: Bearer token required
+      - Required Fields: {
+          "gmail_id": "string",
+          "thread_id": "string",
+          "subject": "string",
+          "sender": "string",
+          "content": "string"
+      }
+      - Response: {
+          "tasks": [...],
+          "suggested_reply": "string",
+          "summary": "string"
+      }
+
+   b. POST /api/emails/current/reply
+      - Status: Working
+      - Purpose: Generate AI reply
+      - Authentication: Bearer token required
+      - Required Fields: {
+          "gmail_id": "string",
+          "content": "string",
+          "context": "string" (optional)
+      }
+      - Response: {
+          "suggested_reply": "string",
+          "tone": "string",
+          "key_points_addressed": [...]
+      }
+
+## Security & Error Handling
+
+1. Authentication Security
+   - JWT token authentication
+   - Google OAuth integration
+   - Token refresh mechanism
+   - Request signing for sensitive operations
+
+2. Authorization
+   - Role-based access control
+   - Team-based access control
+   - Resource ownership validation
+   - Scope-based permissions
+
+3. Error Handling
+   - HTTP Status Codes:
+     - 200: Success
+     - 400: Bad Request
+     - 401: Unauthorized
+     - 403: Forbidden
+     - 404: Not Found
+     - 429: Too Many Requests
+     - 500: Internal Server Error
+   - Detailed error messages
+   - Error logging and monitoring
+
+4. Rate Limiting
+   - API endpoint rate limits
+   - OpenAI API call optimization
+   - Exponential backoff for retries
+
+## Implementation Status
+
+1. Core Features
+   - Root Endpoint: 
+   - Authentication: 
+   - User Management: 
+   - Task Management: 
+   - Team Management: 
+   - Error Handling: 
+
+2. New Features
+   - Task Reminders: 
+   - Current Email Processing: 
+   - Reply Generation: 
+
+## Testing Plan & To-Do List
+
+### Phase 1: Core Authentication [COMPLETED]
+1. Basic Endpoints
+   - [✓] Test GET /
+     - [✓] Verify response
+     - [✓] Check error cases
+   - [✓] Test GET /api/oauth/url
+     - [✓] Verify URL generation
+     - [✓] Check error cases
+   - [✓] Test GET /api/oauth/callback
+     - [✓] Test with valid code
+     - [✓] Test with invalid code
+     - [✓] Verify token generation
+     - [✓] Check user creation/update
+
+2. User Management
+   - [✓] Test POST /api/users
+     - [✓] Create new user
+     - [✓] Email format validation
+     - [✓] OAuth token validation
+     - [✓] Duplicate user handling (409 Conflict)
+   - [✓] Test GET /api/users/me
+     - [✓] Valid token
+     - [✓] Invalid token
+     - [✓] Expired token
+
+### Phase 2: Task Management [COMPLETED]
+1. Task Extraction
+   - [✓] Test OPTIONS /api/extract
+     - [✓] CORS headers
+   - [✓] Test POST /api/extract
+     - [✓] Valid email content
+     - [✓] Empty content
+     - [✓] Large content
+     - [✓] Various email formats
+
+2. Task Operations
+   - [✓] Test GET /api/tasks/{user_email}
+     - [✓] List all tasks
+     - [✓] Filter by status
+     - [✓] Filter by priority
+     - [✓] Authentication
+     - [✓] Authorization
+   - [✓] Test PUT /api/tasks/{task_id}/status
+     - [✓] Update task status
+     - [✓] Handle non-existent tasks
+     - [✓] Validation of status values
+   - [✓] Test POST /api/tasks/{task_id}/confirm
+     - [✓] Confirm task
+     - [✓] Handle non-existent tasks
+   - [✓] Test POST /api/tasks/{task_id}/reject
+     - [✓] Reject task
+     - [✓] Handle non-existent tasks
+   - [✓] Test POST /api/tasks/test/{user_email}
+     - [✓] Create test tasks
+     - [✓] Various priorities and statuses
+     - [✓] Different due dates
+
+### Phase 3: Team Management [COMPLETED]
+1. Team Creation & Updates
+   - [✓] Test POST /api/teams
+     - [✓] Create team
+     - [✓] Add members
+     - [✓] Set admin role
+     - [✓] Handle invalid members
+   - [✓] Test GET /api/teams
+     - [✓] List teams
+     - [✓] Filter by user
+   - [✓] Test GET /api/teams/{team_id}/members
+     - [✓] List members
+     - [✓] Show roles
+   - [✓] Test PUT /api/teams/{team_id}
+     - [✓] Update team info
+     - [✓] Update members
+     - [✓] Handle permissions
+   - [✓] Test DELETE /api/teams/{team_id}
+     - [✓] Delete team
+     - [✓] Cascade effects
+     - [✓] Handle permissions
+
+### Phase 4: New Features [IN PROGRESS]
+1. Task Reminders
+   - [✓] Add reminder_time to Task model
+   - [✓] Implement POST /api/tasks/{task_id}/reminder
+   - [✗] Implement GET /api/tasks/reminders (Authorization Error)
+   - [✓] Add notification system
+   - [✗] Test all reminder operations
+
+2. Current Email Processing
+   - [✓] Implement POST /api/emails/current/process
+   - [✓] Implement POST /api/emails/current/reply
+   - [✓] Test with Gmail integration
+   - [✓] Test AI processing
+   - [✓] Test reply generation
+
+## Current Progress
+
+### Completed 
+- Basic FastAPI setup
+- Database models
+- Core authentication
+- Basic task management
+- Team management
+- Email processing endpoints
+
+### In Progress 
+- Testing Phase 1: Core Authentication
+- Documentation updates
+- Task reminder system
+- Task extraction endpoint fixes
+- Task update endpoint fixes
+
+### Not Started 
+- Enhanced security features
+- Chrome extension integration
+
+## Next Actions
+1. Start systematic testing of Phase 1
+2. Document test results
+3. Fix any issues found
+4. Move to next phase only after current phase is fully tested and stable
+
+Would you like to begin testing Phase 1? We'll start with the root endpoint and OAuth flow.

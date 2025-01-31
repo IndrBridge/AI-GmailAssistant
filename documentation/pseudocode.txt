@@ -1,0 +1,215 @@
+Below is a high-level pseudo code that captures the core logic of your MVP: setting up the Chrome extension, interacting with a FastAPI backend, and integrating with OpenAI for task extraction. It’s not language/framework-specific code but rather an outline of how your components will flow together.
+
+1. Chrome Extension Pseudo Code
+lua
+Copy code
+MANIFEST.JSON
+-------------
+{
+  "name": "AI Email Tasker",
+  "version": "0.1",
+  "manifest_version": 3,
+  "permissions": ["identity", "storage", "activeTab", "scripting"],
+  "host_permissions": ["https://mail.google.com/"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+  // ... other config as needed
+}
+background.js (Service Worker)
+arduino
+Copy code
+background.js:
+--------------
+onInstalled -> 
+    - Setup extension defaults (e.g., create initial local storage or do nothing)
+
+onMessage.addListener((message, sender, sendResponse) -> {
+    switch (message.type):
+        case "OAUTH_INIT":
+            // Start Google OAuth flow if needed, possibly open a new tab 
+            // or use chrome.identity APIs
+            initiateOAuthFlow()
+            break
+
+        // ... handle other message types (like logs, debug, etc.)
+
+    sendResponse({ status: "ok" })
+})
+popup.html / popup.js
+sql
+Copy code
+popup.js:
+---------
+onDocumentLoad -> 
+    - Check if user is already authenticated (e.g., get tokens from storage)
+    - If not authenticated, show a "Sign In with Google" button
+
+onSignInButtonClick ->
+    sendMessage to background.js: { type: "OAUTH_INIT" }
+
+onSummarizeButtonClick ->
+    1. Get current active Gmail tab or the last open email content reference
+    2. Construct request: { emailId, snippet, subject, token }
+    3. POST to our FastAPI endpoint: /api/tasks/extract
+    4. Receive AI-generated tasks/reply
+    5. Display tasks in popup UI (list them, allow user to confirm or discard)
+
+displayTasks(tasks) ->
+    - For each task in tasks:
+        - Render a row with "title", "due_date" if present
+        - Add "Confirm" or "Dismiss" button
+content_script.js (Optional: Injecting into Gmail UI)
+vbnet
+Copy code
+content_script.js:
+------------------
+- (If you decide to embed a sidebar in Gmail)
+- On DOM load of Gmail:
+    detect Gmail layout 
+    createSidebarElement()
+    listen for extension messages or user interactions
+    if user clicks "Analyze Email", gather thread data -> send to popup or background -> forward to FastAPI
+2. FastAPI Backend Pseudo Code
+main.py
+python
+Copy code
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class EmailData(BaseModel):
+    email_id: str
+    subject: str
+    snippet: str
+    content: str   # or tokens for retrieving full content
+    token: str     # OAuth token from client (if doing client-side token mgmt)
+
+@app.get("/")
+def home():
+    return {"message": "FastAPI is running"}
+
+@app.post("/api/tasks/extract")
+def extract_tasks(data: EmailData):
+    # 1. Optionally fetch full email content from Gmail using `data.token`
+    #    or rely on the snippet/content passed in from the extension
+
+    # 2. Call OpenAI to summarize or extract tasks
+    ai_response = call_openai_for_tasks(data.subject, data.snippet, data.content)
+
+    # 3. Parse AI response to a structured JSON
+    tasks = parse_ai_response_to_tasks(ai_response)
+
+    # 4. Store tasks in DB or in-memory (MVP)
+    save_tasks_to_db(tasks)
+
+    return {
+        "tasks": tasks,
+        "suggested_reply": ai_response.get("suggested_reply", "")
+    }
+
+# Additional endpoints:
+# - /auth/google for initiating OAuth
+# - /auth/google/callback for handling the returned code
+# - /api/tasks/list to retrieve user tasks (optional)
+OAuth Flow (simplified)
+less
+Copy code
+@app.get("/auth/google")
+def google_auth():
+    # redirect user to Google's OAuth with required scopes
+    oauth_url = generate_google_oauth_url()
+    return RedirectResponse(oauth_url)
+
+@app.get("/auth/google/callback")
+def google_callback(code: str):
+    # Exchange code for access token, refresh token
+    token_data = exchange_code_for_token(code)
+    # Save tokens to DB (encrypted) or session
+    return {"status": "success", "access_token": token_data.access_token}
+openai_service.py
+python
+Copy code
+def call_openai_for_tasks(subject: str, snippet: str, content: str) -> dict:
+    prompt = f"""
+    You are an assistant that extracts actionable tasks and a possible follow-up
+    email from the following content.
+
+    Subject: {subject}
+    Snippet: {snippet}
+    Full Content: {content}
+
+    Return a JSON structure with:
+    - "tasks": [ { "title": "", "due_date": "", ... } ]
+    - "suggested_reply": "Draft email text"
+    """
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "system", "content": "You are a helpful assistant."},
+                  {"role": "user",   "content": prompt}],
+        temperature=0.7
+    )
+
+    # The actual parsing depends on how the model returns the data (often in `response.choices[0].message.content`)
+    return parse_json(response.choices[0].message.content)
+db_service.py (MVP)
+python
+Copy code
+tasks_db = []
+
+def save_tasks_to_db(tasks: list):
+    # For MVP, just append to an in-memory list or a local SQLite
+    global tasks_db
+    for t in tasks:
+        tasks_db.append(t)
+
+def list_tasks():
+    global tasks_db
+    return tasks_db
+3. Example Flow
+Chrome Extension
+
+User clicks “Sign In with Google” in the extension popup.
+
+background.js opens /auth/google in a new tab.
+User grants permission, Google redirects to /auth/google/callback.
+FastAPI returns access_token, which the extension stores.
+User opens a specific email in Gmail.
+
+The extension button: “Summarize & Extract Tasks.”
+The extension captures the email subject, snippet, ID (and possibly full content if accessible).
+Sends a POST to /api/tasks/extract.
+FastAPI
+
+Receives the request, optionally uses the user’s access_token to fetch the full email from Gmail’s API.
+Calls call_openai_for_tasks(...) to get tasks and a suggested reply from OpenAI.
+Returns a JSON with tasks and suggested_reply.
+Extension
+
+Renders the tasks in a small list.
+Allows the user to confirm tasks, set or adjust due dates, or copy/paste the suggested reply.
+Possibly saves tasks back into the local DB or calls /api/tasks/save.
+User Finishes
+
+The user can see tasks later (either in the extension’s “Tasks” view or some simple web page).
+A notification or reminder system can be added once tasks have a due date.
+Notes & Considerations
+Token Storage: Decide if you store tokens in the extension (client-side) or on the FastAPI server (server-side). The latter is more secure.
+Data Minimization: For privacy reasons, you might store only minimal email data (ID references, short snippets) rather than entire email contents.
+Prompt Engineering: The call_openai_for_tasks function’s prompt is crucial for quality AI results. Iterate on it for better or more structured responses.
+Extension vs. Content Script: You can also embed a sidebar in the Gmail UI using content scripts or a library like InboxSDK. The pseudo code above sticks to a simpler popup approach for MVP.
+Final Thoughts
+This pseudo code shows where and how each piece interacts without diving into the exact syntax for each language or library. You’ll flesh out real code with actual Python/JavaScript, secure OAuth flows, and UI components (HTML/CSS).
+
+With this outline, you can see the end-to-end path:
+
+Chrome Extension captures user input and email data.
+FastAPI handles OAuth, calls OpenAI for NLP tasks.
+OpenAI returns structured tasks and suggested replies.
+FastAPI sends results back, and the extension displays them.
+This sets the stage for a functional MVP that you can continue to refine.

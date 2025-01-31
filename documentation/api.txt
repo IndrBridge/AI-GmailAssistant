@@ -1,0 +1,10 @@
+-----------------OAuth 
+
+Chrome Extension:
+
+CLient ID: 443940086164-hev4tr2knh8s6dk8t5b5f60kdl93fpgs.apps.googleusercontent.com
+
+-----------------OpenAI API
+
+
+

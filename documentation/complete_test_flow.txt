@@ -1,0 +1,172 @@
+# Gmail Assistant API Complete Testing Flow
+
+## Test Environment
+- Server: http://localhost:8000
+- Testing Tool: FastAPI Swagger UI (http://localhost:8000/docs)
+- Date: 2024-12-25
+
+## 1. Core Authentication Flow
+1. GET /
+   - Basic health check
+   - Expected: {"message": "Hello from FastAPI MVP!"}
+
+2. GET /api/oauth/url
+   - Get Google OAuth URL
+   - Store: oauth_url
+
+3. GET /api/oauth/callback
+   - Input: code=test_user_1
+   - Store: access_token, user_info
+
+4. POST /token
+   - Get JWT using OAuth credentials
+   - Input: username, password (oauth token)
+   - Store: jwt_token
+
+## 2. User Management
+1. POST /api/users
+   - Create new user
+   - Input: email, oauth_token
+
+2. GET /api/users/me
+   - Get current user info
+   - Header: Bearer token
+
+## 3. Task Management
+1. POST /api/tasks
+   - Create new task
+   - Input: title, description, priority, deadline
+   - Store: task_id
+
+2. GET /api/tasks/user/{user_id}
+   - Get user's tasks
+   - Query: status, team_id
+
+3. GET /api/tasks/{task_id}/history
+   - Get task history
+
+4. PUT /api/tasks/{task_id}
+   - Update task
+   - Input: status, priority, deadline
+
+5. POST /api/tasks/{task_id}/complete
+   - Mark task as completed
+
+6. GET /api/tasks/filter
+   - Filter tasks
+   - Query: status, priority, team_id, assigned_to, due_before, due_after, search
+
+7. GET /api/tasks/analytics
+   - Get task statistics
+   - Query: team_id, start_date, end_date
+
+8. GET /api/tasks/upcoming
+   - Get upcoming tasks
+   - Query: days (default 7)
+
+9. GET /api/tasks/overdue
+   - Get overdue tasks
+
+10. POST /api/tasks/{task_id}/reminder
+    - Set task reminder
+    - Input: reminder_time
+
+11. GET /api/tasks/reminders
+    - Get upcoming reminders
+
+## 4. Team Management
+1. POST /api/teams
+   - Create new team
+   - Input: name, user_email
+   - Store: team_id
+
+2. GET /api/teams
+   - Get user's teams
+   - Query: user_email
+
+3. GET /api/teams/{team_id}/members
+   - Get team members
+   - Response: List with roles
+
+4. PUT /api/teams/{team_id}
+   - Update team
+   - Input: name, user_email
+
+5. DELETE /api/teams/{team_id}
+   - Delete team
+   - Query: user_email
+
+6. POST /api/teams/{team_id}/members
+   - Add team member
+   - Input: user_id, role
+
+## 5. Email Processing
+1. OPTIONS /api/extract
+   - CORS preflight check
+
+2. POST /api/extract
+   - Extract tasks from email
+   - Input: content, gmail_id, user_email
+   - Store: extracted_tasks
+
+3. POST /api/emails/current/process
+   - Process current email
+   - Input: gmail_id, thread_id, subject, sender, content
+   - Store: processed_email_id
+
+4. POST /api/emails/current/reply
+   - Generate AI reply
+   - Input: gmail_id, content, context
+   - Store: reply_suggestion
+
+## Test Flow Sequence
+1. Start with authentication
+2. Create/verify user
+3. Create personal tasks
+4. Create team
+5. Add team members
+6. Create team tasks
+7. Process test emails
+8. Test task management features
+9. Test analytics and filters
+10. Test reminder system
+
+## For Each Test:
+Record:
+- Request Data
+- Response (Success/Failure)
+- Response Time
+- Any Errors
+- Notes/Issues
+
+## Important Headers:
+- Authorization: Bearer {token}
+- Content-Type: application/json
+
+## Test Data Requirements:
+- Test user email
+- Test OAuth tokens
+- Sample email content
+- Test team names
+- Various task priorities/statuses
+
+## Error Scenarios to Test:
+- Invalid tokens
+- Missing permissions
+- Invalid data formats
+- Non-existent resources
+- Duplicate creation attempts
+
+
+# Results Template
+For each step, record:
+- Status: ✅ Success | ❌ Failed
+- Response Data
+- Issues Found
+- Notes
+
+## Testing Notes:
+- Use test_user tokens for development
+- Document any unexpected behavior
+- Note response times
+- Record any error messages

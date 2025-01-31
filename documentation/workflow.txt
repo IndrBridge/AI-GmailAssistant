@@ -1,0 +1,264 @@
+1. Project Setup
+Create Project Folder
+
+In your IDE, create a new folder called ai_email_mvp.
+Example path:
+bash
+Copy code
+/path/to/ai_email_mvp
+Initialize Version Control (Optional but Recommended)
+
+Open a terminal in ai_email_mvp and run:
+csharp
+Copy code
+git init
+This ensures you can track changes over time.
+Set Up Python Virtual Environment
+
+In your IDE terminal:
+bash
+Copy code
+python -m venv venv
+source venv/bin/activate   # (Mac/Linux)
+# or .\venv\Scripts\activate (Windows)
+Create Requirements File
+
+In the root of ai_email_mvp, create a file named requirements.txt:
+txt
+Copy code
+fastapi
+uvicorn
+openai
+pydantic
+python-dotenv
+requests
+# Potentially 'google-auth' or 'google-auth-oauthlib' for Google OAuth
+Install Dependencies
+
+From the terminal (with the virtual env activated):
+bash
+Copy code
+pip install -r requirements.txt
+2. FastAPI Skeleton
+Create main.py
+
+In your IDE, create a file main.py at the root of ai_email_mvp.
+Add the basic FastAPI boilerplate:
+python
+Copy code
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello from FastAPI MVP!"}
+Run the Server
+
+In the terminal:
+bash
+Copy code
+uvicorn main:app --reload
+Verify you see the message {"message": "Hello from FastAPI MVP!"} at http://127.0.0.1:8000/.
+Project Structure (Optional)
+
+You might create subfolders as you grow:
+bash
+Copy code
+ai_email_mvp/
+├─ main.py
+├─ requirements.txt
+├─ .env
+├─ app/
+│  ├─ routes/
+│  ├─ services/
+│  └─ ...
+└─ extension/
+For now, keep it simple.
+3. Integrate OpenAI
+Set Up Environment Variables
+
+In the root, create a file named .env (never commit real credentials to Git):
+makefile
+Copy code
+OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+Load API Key in main.py
+
+Install python-dotenv (already in requirements if you added it).
+At the top of main.py, import and load:
+python
+Copy code
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+Create a Function to Call OpenAI
+
+In main.py, add:
+python
+Copy code
+import openai
+
+openai.api_key = OPENAI_API_KEY
+
+def extract_tasks_from_email(content: str) -> dict:
+    prompt = f"""
+    You are an assistant that extracts actionable tasks and a possible follow-up 
+    from the following email content. Return a JSON structure with 'tasks' 
+    (list of tasks with title/due_date) and 'suggested_reply'.
+
+    Email content:
+    {content}
+    """
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
+    )
+    # Expect the model to return JSON in the message.content
+    return response.choices[0].message.content
+Add an Endpoint to Test
+
+Still in main.py, add:
+python
+Copy code
+from fastapi import Request
+
+@app.post("/api/extract")
+async def api_extract_tasks(request: Request):
+    data = await request.json()
+    email_content = data.get("content", "")
+    ai_result = extract_tasks_from_email(email_content)
+    return {"ai_result": ai_result}
+Test in Your IDE
+
+Run uvicorn main:app --reload.
+Use an HTTP client (like your IDE’s REST client or curl) to send:
+bash
+Copy code
+curl -X POST -H "Content-Type: application/json" \
+-d '{"content":"Hello, can you schedule a meeting next Tuesday?"}' \
+http://127.0.0.1:8000/api/extract
+Verify you get back an AI-generated JSON snippet with tasks and reply suggestions.
+4. Chrome Extension - Initial Setup
+Create extension Folder
+
+In ai_email_mvp, create a subfolder: extension/.
+Inside it, create these files:
+arduino
+Copy code
+extension/
+├─ manifest.json
+├─ popup.html
+├─ popup.js
+└─ background.js
+Write manifest.json
+
+Minimal example:
+json
+Copy code
+{
+  "name": "AI Email Tasker",
+  "version": "0.1",
+  "manifest_version": 3,
+  "permissions": ["storage", "activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
+popup.html
+
+html
+Copy code
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Email Tasker</title>
+</head>
+<body>
+  <h1>AI Email Tasker</h1>
+  <textarea id="emailContent" placeholder="Paste email content here"></textarea>
+  <button id="btnExtract">Extract Tasks</button>
+  <div id="result"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+popup.js
+
+js
+Copy code
+document.addEventListener("DOMContentLoaded", () => {
+  const btnExtract = document.getElementById("btnExtract");
+  const emailContent = document.getElementById("emailContent");
+  const resultDiv = document.getElementById("result");
+
+  btnExtract.addEventListener("click", async () => {
+    const contentValue = emailContent.value;
+    if (!contentValue) return;
+
+    // Simple fetch to local FastAPI
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: contentValue })
+      });
+
+      const data = await response.json();
+      resultDiv.innerHTML = `<pre>${JSON.stringify(data.ai_result, null, 2)}</pre>`;
+    } catch (err) {
+      console.error(err);
+      resultDiv.innerHTML = "<p>Failed to connect.</p>";
+    }
+  });
+});
+Load Extension in Chrome
+
+Open chrome://extensions
+Enable Developer Mode.
+Click Load Unpacked and select the extension folder.
+Click the extension icon, confirm the popup appears.
+Test
+
+Paste some mock email text in the text area.
+Click Extract Tasks.
+Check if your FastAPI logs show a request and the popup displays AI results.
+5. Bringing It Together
+Full Email Content
+
+(Optional) If you want to parse actual Gmail content, you’ll need Gmail API + OAuth.
+For MVP, you might just copy/paste from Gmail into the extension’s text area.
+Later phases: implement Gmail OAuth flow in the background script or content script.
+Styling / UI Enhancements
+
+Add CSS to popup.html or use a small framework (Bootstrap inlined, for instance).
+Provide a better layout for tasks, suggested replies, etc.
+Database Integration
+
+If you want to save tasks:
+Create a Task model or a simple table in SQLite.
+Add endpoints in FastAPI to POST /api/tasks or GET /api/tasks.
+Testing & QA
+
+Use your IDE or local environment to test both the extension and FastAPI thoroughly.
+Mock different email inputs in popup.html or through a content script if injecting directly into Gmail.
+Iterate
+
+Gather feedback from your friend/colleagues.
+Improve prompts, parse the AI output more systematically.
+Expand to advanced features (reminders, auto Gmail sending, etc.).
+6. Deployment (Optional for MVP)
+Deploy FastAPI
+
+Host on a service like Heroku, Railway, or AWS.
+Update your extension’s fetch URL to point to the live domain instead of http://127.0.0.1:8000.
+Extension Distribution
+
+If you only need a small group to install it, keep using Load Unpacked or share the packaged .zip.
+For a larger audience, publish on the Chrome Web Store (requires a developer account and compliance checks).

@@ -1,0 +1,95 @@
+1. UI Development Rules
+Design Consistency:
+
+Maintain consistent styling for all UI elements using Material-UI or custom CSS.
+Ensure responsiveness for different screen sizes, particularly for Gmail sidebar integration.
+Chrome Extension-Specific Guidelines:
+
+Use manifest.json to manage permissions and configurations, focusing on Gmail access.
+Test extension compatibility with multiple Gmail environments to ensure robustness.
+Component-Level Integrity:
+
+Create modular components for:
+Task Dashboard
+Email Summarization
+Reminder Management
+Each component should be independent and reusable.
+2. API Integration Rules
+Endpoint Usage:
+
+Use documented endpoints from main.py only:
+/api/tasks/{user_email} for retrieving tasks.
+/api/extract for email task extraction.
+/api/tasks/{task_id} for updates.
+/api/tasks/{task_id}/reminder for reminders.
+Dynamic Updates:
+
+The UI should dynamically reflect changes from API calls.
+Handle errors gracefully (e.g., retry logic or informative alerts).
+Token Security:
+
+OAuth tokens must be handled securely using session or local storage.
+Do not expose tokens in network logs or the console.
+3. Testing and Validation
+UI Testing:
+
+Ensure each UI component interacts seamlessly with the backend.
+Validate all CRUD operations for tasks and reminders.
+Backend API Testing:
+
+Use automated tests to ensure endpoints function as expected before UI integration.
+Error Handling:
+
+Ensure descriptive error messages for users.
+Log errors with sufficient detail for debugging.
+4. Project Documentation
+Progress Documentation:
+
+Log each completed feature in features_complete.md.
+Update feature_progress.md to reflect the current status of UI components and APIs.
+Code Annotations:
+
+Include comments in JavaScript code to explain API calls, logic, and key functions.
+5. Security and Privacy
+API Keys and Tokens:
+
+Never hardcode sensitive data (e.g., API keys, client secrets).
+Use environment variables for storing sensitive information.
+HTTPS Requirement:
+
+All API calls must use HTTPS to protect user data.
+6. Workflow Rules
+No Deletion Without Approval:
+
+Do not delete existing files or components unless explicitly approved in the prompt.
+Multi-File Awareness:
+
+Maintain contextual awareness when modifying multiple files to avoid inconsistencies.
+Feature Isolation:
+
+Develop one feature at a time, ensuring full functionality before starting another.
+Feedback Integration:
+
+Prompt Cascade for refinement based on testing outcomes.
+7. Cascade-Specific Capabilities
+Memories:
+
+Leverage Cascade's memory feature to store context, such as:
+API specifications
+UI design principles
+Completed tasks
+Use stored memories to ensure consistency across interactions.
+Terminal Commands:
+
+Automate safe terminal commands (e.g., npm install, npm run build) for UI development.
+Whitelist specific commands and block potentially destructive actions.
+Chain-of-Thought Prompting:
+
+Break down complex tasks into step-by-step instructions to guide Cascade efficiently.
+Responsiveness to Feedback:
+
+Refine outputs iteratively by incorporating specific feedback.
+Implementation Notes
+Focus on modular development to allow for future scalability.
+Ensure user-friendly design to enhance engagement and adoption.
+Regularly validate progress against the project’s objectives to maintain focus.

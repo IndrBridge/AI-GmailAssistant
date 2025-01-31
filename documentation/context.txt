@@ -1,0 +1,87 @@
+Project Overview
+We are building an MVP (Minimum Viable Product) for an AI-based tool that:
+
+Connects to Gmail via OAuth.
+Automatically summarizes emails and extracts actionable tasks.
+Suggests follow-up replies and reminders for those tasks.
+This product is initially targeted at a small group of users (e.g., a friend and their colleagues), all using individual Gmail accounts.
+
+Core Objectives
+Parse Emails for Tasks
+
+Use simple NLP or rule-based methods (enhanced by OpenAI) to detect references such as “follow up,” “schedule a meeting,” “review this document,” etc.
+Generate AI-Powered Summaries & Replies
+
+Call the OpenAI API (e.g., GPT-3.5 or GPT-4) to summarize long email threads and propose draft responses.
+Chrome Extension UI
+
+Provide a lightweight, in-context interface for viewing auto-generated tasks and replies directly from Gmail.
+FastAPI Backend
+
+Handle OAuth with Google, manage user tokens securely, orchestrate calls to the OpenAI API, and store minimal data (tasks, summaries, etc.).
+Technical Scope
+Language & Frameworks
+
+Front End: Chrome Extension (HTML, JS, minimal CSS)
+Backend: FastAPI (Python)
+AI Integration: OpenAI API (Chat Completion endpoint)
+Database / Storage
+
+Store tasks, user tokens (if needed), and minimal metadata in a lightweight solution (e.g., SQLite, MongoDB, or a simple JSON for MVP).
+Security
+
+Use Google OAuth 2.0 for authentication and authorization.
+Store refresh tokens securely (encrypted at rest) if doing server-side token management.
+Request only the necessary OAuth scopes (e.g., Gmail read-only) to reduce risk.
+User Flow (MVP)
+Install Extension
+
+User installs the Chrome extension, which injects a small popup or sidebar in Gmail.
+Sign In with Google
+
+From the extension, user initiates the OAuth flow and grants permission for read access to Gmail.
+Email Fetch & Processing
+
+The extension calls the FastAPI server to retrieve recent emails or relevant email content (subject, snippets, etc.).
+FastAPI then sends email content to the OpenAI API for summarization or task extraction.
+Task & Summary Display
+
+The extension UI shows AI-generated tasks (including optional due dates) and a suggested reply or follow-up action.
+Task Confirmation & Reminders
+
+User can confirm or edit tasks.
+The system may send basic reminders (e.g., notifications or daily digest) about pending tasks.
+Data Persistence
+
+Confirmed tasks (and any associated metadata) are stored in the backend DB for later retrieval or analytics.
+Immediate Limitations
+Gmail Only: No Outlook or other email providers at this time.
+Single-User Focus: The system is not multi-tenant or enterprise-ready; each user’s data is managed individually.
+Basic Reminders: Simple push notifications or email reminders, without advanced scheduling logic.
+Minimal UI: An embedded extension popup or basic sidebar, no standalone web app yet (planned for future phases).
+Future Plans
+Expanded NLP
+More sophisticated detection of deadlines, locations, or contact details from emails.
+Full Web Dashboard
+A separate React/Vue/Angular front end to view and manage tasks in one place.
+Team Collaboration
+Assign tasks to other team members or collaborate on shared email threads.
+Calendar Integration
+Automate scheduling or propose meeting slots directly from the extension.
+CRM Integration
+Sync leads and tasks with tools like HubSpot or Salesforce.
+Key Deliverables for MVP
+Chrome Extension
+Displays detected tasks and suggested replies in the context of Gmail.
+FastAPI Backend
+Receives email data via OAuth, calls OpenAI API, returns structured tasks/summaries, and stores minimal user/task data.
+OpenAI Integration
+Summaries and task extraction (plus optional follow-up replies).
+Security & Privacy
+Secure handling of tokens, minimal data retention, and transparency about what’s being accessed in Gmail.
+Success Criteria
+Users can log in with their Google accounts through the extension.
+System automatically identifies at least some actionable tasks in new emails.
+System suggests a relevant reply for a user to copy/edit/send.
+Users can view and manage tasks (confirm, discard, mark complete).
+Basic notifications or reminders help ensure tasks are not forgotten.

@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+openai>=1.0.0
+pydantic
+python-dotenv
+requests
+sqlalchemy
+alembic
+python-jose[cryptography]>=3.3.0  # For JWT tokens
+passlib[bcrypt]>=1.7.4  # For password hashing
+python-multipart>=0.0.5  # For form data parsing
+google-auth-oauthlib==1.1.0
+google-auth-httplib2==0.1.1
+google-api-python-client==2.108.0
+beautifulsoup4>=4.12.0  # For HTML parsing

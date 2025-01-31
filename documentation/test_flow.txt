@@ -1,0 +1,75 @@
+# Gmail Assistant API Testing Flow
+
+## Test Environment
+- Server: http://localhost:8000
+- Testing Tool: FastAPI Swagger UI (http://localhost:8000/docs)
+- Date: 2024-12-25
+
+## Test Flow 1: Authentication
+1. GET /api/oauth/url
+   - Expected: Returns Google OAuth URL
+   - Store: oauth_url
+
+2. GET /api/oauth/callback (Test Mode)
+   - Input: code=test_user_1
+   - Expected: Returns JWT token
+   - Store: access_token
+
+3. GET /api/users/me
+   - Header: Bearer {access_token}
+   - Expected: Returns user profile
+   - Store: user_id, email
+
+## Test Flow 2: Personal Tasks
+1. POST /api/tasks
+   - Header: Bearer {access_token}
+   - Input: {
+       "title": "Test Task 1",
+       "description": "Testing task creation",
+       "priority": "high",
+       "due_date": "2024-12-26T12:00:00Z"
+     }
+   - Store: task_id_1
+
+2. PUT /api/tasks/{task_id_1}
+   - Update priority and description
+   - Verify changes
+
+3. POST /api/tasks/{task_id_1}/reminder
+   - Set reminder for tomorrow
+   - Verify reminder creation
+
+## Test Flow 3: Team Management
+1. POST /api/teams
+   - Create test team
+   - Store: team_id
+
+2. POST /api/teams/{team_id}/members
+   - Add test user as member
+   - Verify member addition
+
+3. POST /api/tasks (Team Task)
+   - Create task assigned to team
+   - Store: team_task_id
+
+## Test Flow 4: Email Processing
+1. POST /api/emails/current/process
+   - Process test email
+   - Verify task extraction
+
+2. POST /api/emails/current/reply
+   - Generate reply suggestion
+   - Verify reply content
+
+## Results Template
+For each step, record:
+- Status: ✅ Success | ❌ Failed
+- Response Data
+- Issues Found
+- Notes
+
+## Testing Notes:
+- Use test_user tokens for development
+- Document any unexpected behavior
+- Note response times
+- Record any error messages

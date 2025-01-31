@@ -1,0 +1,98 @@
+### General Scanning Rules for Any File or Project
+The following rules are adapted from your scanning plan, ensuring they are generic and applicable to any project or file structure.
+
+## Scan Depths and Levels
+Divide the project into manageable "depth levels" for scanning. This allows a systematic and thorough approach to analyzing the structure and content.
+
+DEPTH 0: Root-level files and immediate directories.
+DEPTH 1: First-level subdirectories and their immediate files.
+DEPTH 2: Configuration, setup, and shared resources.
+DEPTH 3: Core functionality, implementation, and main modules.
+DEPTH 4: Tests, examples, and auxiliary documentation.
+
+## Scanning Steps
+
+1. Initialization
+
+- Start by listing all files and directories recursively.
+- Maintain a log for tracking identified files, directories, and their corresponding depth levels.
+- Create a working directory for logs (e.g., /scan_tracking) to store progress and findings.
+
+2. Perform Structured Scanning
+-Follow the scanning depths one level at a time:
+
+DEPTH 0: Root-Level Scan
+
+- Focus on key metadata files, manifest files, and top-level documentation:
+- Examples: .gitignore, README.md, LICENSE, pyproject.toml, .env, etc.
+- Identify the immediate structure of the project and define entry points.
+
+DEPTH 1: First-Level Directories
+- Scan the first-level directories for their purpose:
+- Examples: src/ (source code), tests/ (test cases), docs/ (documentation), etc.
+- Log all immediate files and subdirectories within these directories.
+
+DEPTH 2: Configuration & Setup
+
+- Locate configuration files such as .json, .yml, .toml, or .ini files.
+- Focus on CI/CD workflows, issue templates, and other setup-related files:
+- Examples: Dockerfile, GitHub workflows, pull_request_template.md.
+
+DEPTH 3: Core Functionality
+
+- Dive into the src/ or equivalent directory to analyze core code modules.
+- Pay attention to:
+  - File types (.py, .js, .java, .cpp, etc.).
+  - Directory structures that indicate modular design.
+
+DEPTH 4: Testing & Examples
+
+- Analyze the tests/ directory for testing strategies (unit tests, integration tests, etc.).
+- Look for example files or demo scripts (commonly in examples/ or similar directories).
+
+3. Cross-Check for Missed Files
+
+- Revisit each directory and compare findings with logs.
+- If new files are identified in a re-scan, analyze them and add them to the logs.
+
+4. Analyze Core Functionality
+
+- Look for:
+  - Entry points (e.g., main.py, index.js, etc.).
+  - Key implementation modules that drive the project.
+  - Shared utility scripts or helper modules.
+
+5. Document the Findings
+
+- Summarize each depth level with:
+  - Key files and directories.
+  - Their purpose or role in the project.
+- Create a structured document or folder hierarchy for tracking.
+
+6. Exit Condition
+
+- The scan is complete when:
+  - All files and directories have been scanned.
+  - No new files or directories are discovered in additional re-scans.
+  - All findings are logged and summarized.
+
+## Rules for Logs and Tracking
+
+- Create a Log Directory: Maintain a directory like /scan_tracking with subfolders for each depth level.
+- Example: /scan_tracking/depth_0, /scan_tracking/depth_1, etc.
+- Log Format:
+  - Include file names, paths, and identified roles.
+  - Use structured formats like JSON or YAML for easy parsing.
+
+## Track Progress:
+
+- Regularly update logs during scanning to track what's been completed.
+- Include timestamps for each scan session.
+
+## Output Requirements
+
+- Accuracy: Ensure all files and directories are accounted for.
+- Completeness: Include all levels of depth in the scan.
+- Insights:
+  - Highlight core functionalities and their dependencies.
+  - Provide actionable steps for understanding or improving the project.

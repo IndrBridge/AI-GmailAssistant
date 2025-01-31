@@ -1,0 +1,84 @@
+# Planned Features and Endpoints
+
+## Task Analytics and Insights
+
+1. GET /api/tasks/analytics
+   - Purpose: Get analytics and insights about user's tasks
+   - Features:
+     * Task completion rate
+     * Average completion time
+     * Priority distribution
+     * Task source distribution (email vs manual)
+   - Status: Planned
+   - Notes: Will provide dashboard-like metrics for task management
+
+2. GET /api/tasks/upcoming
+   - Purpose: Get tasks with upcoming deadlines
+   - Features:
+     * Filter by time range (today, this week, this month)
+     * Sort by priority and due date
+     * Include reminder status
+   - Status: Planned
+   - Notes: Will help users plan their work better
+
+3. GET /api/tasks/overdue
+   - Purpose: Get overdue tasks
+   - Features:
+     * Filter by time range
+     * Sort by priority and due date
+     * Include task age
+   - Status: Planned
+   - Notes: Will help users identify delayed work
+
+## Enhanced Filtering
+
+1. Advanced Task Filtering
+   - Current: Basic filtering in GET /api/tasks/{user_email}
+   - Planned Enhancements:
+     * Multiple status filters
+     * Date range filtering
+     * Full-text search in task content
+     * Team-based filtering
+     * Source-based filtering (email, manual, etc.)
+
+2. Team Task Analytics
+   - Purpose: Team-level insights and metrics
+   - Features:
+     * Team completion rates
+     * Member contribution stats
+     * Team workload distribution
+   - Status: Planned
+
+## Email Processing Improvements
+
+1. Enhanced Email Analysis
+   - Current: Basic task extraction
+   - Planned Enhancements:
+     * Multiple task extraction from single email
+     * Priority inference from email content
+     * Deadline inference from context
+     * Better handling of email threads
+
+2. Smart Reply Suggestions
+   - Current: Basic reply generation
+   - Planned Enhancements:
+     * Context-aware replies
+     * Task status inclusion
+     * Multiple reply options
+     * Custom tone settings
+
+## Integration Features
+
+1. Calendar Integration
+   - Purpose: Sync tasks with calendar
+   - Features:
+     * Auto-schedule tasks
+     * Deadline reminders
+     * Meeting task extraction
+
+2. Document Integration
+   - Purpose: Handle document references
+   - Features:
+     * Extract tasks from documents
+     * Link tasks to documents
+     * Track document versions

@@ -1,0 +1,11 @@
+{
+  "name": "gmail-assistant-extension",
+  "version": "1.0.0",
+  "description": "A smart assistant that helps manage tasks and reminders from Gmail",
+  "scripts": {
+    "generate-icons": "node generate_icons.js"
+  },
+  "dependencies": {
+    "canvas": "^2.11.0"
+  }
+}
